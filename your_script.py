@@ -67,7 +67,8 @@ def main():
         # Display total for each sub-category
         st.title("Total Expenditure by Sub-Category:")
         for category in categories:
-            total_amount = data_df[data_df["Category"] == category]["Amount"].sum()
+            total_amount = df[df["Category"] == category]["Amount"].sum()
+
             st.write(f"{category}: ${total_amount:,.2f}")
 
 if __name__ == "__main__":
