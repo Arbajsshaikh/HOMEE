@@ -8,15 +8,15 @@ df = pd.DataFrame(columns=["Site Name", "Date", "Category", "Amount"])
 # Function to save data to CSV file
 def save_to_csv(site_name, data):
     filename = f"{site_name}.csv"
-    df = pd.DataFrame(data, columns=["Date", "Category", "Amount"])
-    df.to_csv(filename, index=False)
+    data_pivoted = data.pivot(index="Date", columns="Category", values="Amount")
+    data_pivoted.to_csv(filename)
     return filename
 
 # Function to get data from CSV file
 def get_data(site_name):
     filename = f"{site_name}.csv"
     try:
-        df = pd.read_csv(filename)
+        df = pd.read_csv(filename, index_col="Date")
         return df
     except FileNotFoundError:
         return None
