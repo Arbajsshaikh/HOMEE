@@ -23,6 +23,7 @@ def get_data(site_name):
 
 # Main Streamlit app
 def main():
+    global sites_df  # Declare sites_df as global
     st.title("Construction Site Tracker")
 
     # Add Site input with dropdown selector
