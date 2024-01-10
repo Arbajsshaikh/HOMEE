@@ -23,7 +23,8 @@ def get_data(site_name):
 
 # Main Streamlit app
 def main():
-    global sites_df  # Declare sites_df as global
+    global sites_df, df  # Declare sites_df and df as global
+
     st.title("Construction Site Tracker")
 
     # Add Site input with dropdown selector
@@ -33,6 +34,7 @@ def main():
 
     # Site Name dropdown
     selected_site_name = st.selectbox("Select Site Name:", sites_df["Site Name"].tolist())
+
 
     # Input fields for contract amount
     contract_amount = st.number_input("Enter Site Contract Amount:", min_value=0.0)
@@ -56,31 +58,29 @@ def main():
         selected_category = st.selectbox("Select Category:", categories)
         category_amount = st.number_input(f"Enter Amount for {selected_category}:", min_value=0.0)
 
-        # Save data to the global DataFrame
-        global df
-        if st.button("Submit"):
-            new_data = {"Site Name": selected_site_name, "Date": date, "Category": selected_category, "Amount": category_amount}
-            df = pd.concat([df, pd.DataFrame([new_data])], ignore_index=True)
+    if st.button("Submit"):
+        new_data = {"Site Name": selected_site_name, "Date": date, "Category": selected_category, "Amount": category_amount}
+        df = pd.concat([df, pd.DataFrame([new_data])], ignore_index=True)
 
-        # Save data to CSV and display it
-        if st.button("Save to CSV"):
-            filename = save_to_csv(selected_site_name, df)
-            st.success(f"Data saved to {filename}")
+    # Save data to CSV and display it
+    if st.button("Save to CSV"):
+        filename = save_to_csv(selected_site_name, df)
+        st.success(f"Data saved to {filename}")
 
-        # Get data for a specific site
-        if st.button("Get Data"):
-            retrieved_data = get_data(selected_site_name)
-            if retrieved_data is not None:
-                st.write("Retrieved Data:")
-                st.write(retrieved_data)
-            else:
-                st.warning("Data not found for the specified site.")
+    # Get data for a specific site
+    if st.button("Get Data"):
+        retrieved_data = get_data(selected_site_name)
+        if retrieved_data is not None:
+            st.write("Retrieved Data:")
+            st.write(retrieved_data)
+        else:
+            st.warning("Data not found for the specified site.")
 
-        # Display total for each sub-category
-        st.title("Total Expenditure by Sub-Category:")
-        for category in categories:
-            total_amount = df[df["Category"] == category]["Amount"].sum()
-            st.write(f"{category}: ${total_amount:,.2f}")
+    # Display total for each sub-category
+    st.title("Total Expenditure by Sub-Category:")
+    for category in categories:
+        total_amount = df[(df["Site Name"] == selected_site_name) & (df["Category"] == category)]["Amount"].sum()
+        st.write(f"{category}: ${total_amount:,.2f}")
 
 if __name__ == "__main__":
     main()
