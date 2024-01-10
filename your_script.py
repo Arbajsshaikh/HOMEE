@@ -26,25 +26,9 @@ def display_totals():
 def main():
     st.title('Construction Site Tracker')
 
-    # Dropdown for selecting existing sites
-    st.sidebar.header('Select Existing Site')
-    existing_sites = df['Site Name'].unique()
-    selected_site = st.sidebar.selectbox('Select Site', existing_sites, key='existing_site')
-
-    # Set selected site in session state
-    st.session_state.site_name = selected_site
-
-    # Display selected site name on the right side
-    st.text(f'Construction Site Tracker: {selected_site}')
-
-    # Display contract amount if set previously
-    if selected_site in df['Site Name'].values:
-        contract_amount = df.loc[df['Site Name'] == selected_site, 'Contract Amount'].iloc[0]
-        st.sidebar.text(f"Contract Amount: {contract_amount}")
-
     # Input for Site Name and Contract Amount
     st.sidebar.header('Input')
-    st.sidebar.text_input('New Site Name', key='site_name', value=selected_site)
+    st.sidebar.text_input('Site Name', key='site_name')
     st.sidebar.number_input('Contract Amount', key='contract_amount')
 
     # Date input
