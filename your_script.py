@@ -63,8 +63,8 @@ def main():
 
     # Sub-inputer for categories
     st.sidebar.header('Category Input')
-    category = st.sidebar.text_input('Select Category', key='category')
-    amount = st.sidebar.number_input('Amount', key='amount')
+    category = st.sidebar.text_input('Select Category', key='category', value='')
+    amount = st.sidebar.number_input('Amount', key='amount', value=0)
 
     # Submit button to save data
     if st.sidebar.button('Submit') and new_site_name:
