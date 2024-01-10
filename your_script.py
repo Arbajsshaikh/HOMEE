@@ -50,7 +50,8 @@ def main():
 
     # Input for Site Name and Contract Amount
     st.sidebar.header('Input')
-    new_site_name = st.sidebar.text_area('New Site Name', key='site_name', value=st.session_state.site_name)
+    new_site_name = st.sidebar.text_input('New Site Name', key='site_name', value=st.session_state.site_name)
+
     contract_amount = st.sidebar.number_input('Contract Amount', key='contract_amount', value=st.session_state.contract_amount)
 
     # Update session state with entered site name and contract amount
