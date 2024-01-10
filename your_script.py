@@ -36,9 +36,9 @@ def main():
     # Site Name dropdown
     selected_site_name = st.selectbox("Select Site Name:", sites_df["Site Name"].tolist())
 
-    # Rest of the code...
-    # (Remaining code remains unchanged)
-
+    # Date input
+    date = st.date_input("Enter Date:")
+    
     # Save data to the global DataFrame
     if st.button("Submit"):
         new_data = {"Site Name": selected_site_name, "Date": date, "Category": selected_category, "Amount": category_amount}
