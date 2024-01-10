@@ -1,44 +1,74 @@
 import streamlit as st
 import pandas as pd
 
-def save_to_csv(data, site_name):
-    df = pd.DataFrame(data)
-    df.to_csv(f"{site_name}.csv", index=False)
+# Function to save data to CSV file
+def save_to_csv(site_name, data):
+    filename = f"{site_name}.csv"
+    df = pd.DataFrame(data, columns=["Date", "Category", "Amount"])
+    df.to_csv(filename, index=False)
+    return filename
 
+# Function to get data from CSV file
+def get_data(site_name):
+    filename = f"{site_name}.csv"
+    try:
+        df = pd.read_csv(filename)
+        return df
+    except FileNotFoundError:
+        return None
+
+# Main Streamlit app
 def main():
-    st.title("Construction Site Data Entry App")
+    st.title("Construction Site Tracker")
 
+    # Input fields for site name and contract amount
     site_name = st.text_input("Enter Site Name:")
-    contract_amount = st.number_input("Enter Site Contract Amount:")
+    contract_amount = st.number_input("Enter Site Contract Amount:", min_value=0.0)
 
-    if st.button("Show Site Info"):
-        st.write(f"Site Name: {site_name}")
-        st.write(f"Site Contract Amount: {contract_amount}")
+    # Display site name and contract amount
+    if site_name and contract_amount:
+        st.sidebar.write(f"Site Name: {site_name}")
+        st.sidebar.write(f"Contract Amount: ${contract_amount:,.2f}")
 
-    date = st.date_input("Select Date:")
+        # Date input
+        date = st.date_input("Enter Date:")
 
-    categories = ['Bricks', 'Plumber', 'Murum', 'Sand', 'Aggregate', 'Steel', 'Electrical material',
-                  'Plumbing material', 'Flooring material', 'Labor payment', 'Ducting', 'Rcc labor',
-                  'Brick work and plaster work', 'Electric labor', 'Plumbing labor', 'Flooring labor', 'IPS labor']
+        # Sub-categories and their inputs
+        categories = [
+            'Bricks', 'Plumber', 'Murum', 'Sand', 'Aggregate', 'Steel',
+            'Electrical material', 'Plumbing material', 'Flooring material',
+            'Labor payment', 'Ducting', 'Rcc labor', 'Brick work and plaster work',
+            'Electric labor', 'Plumbing labor', 'Flooring labor', 'IPS labor'
+        ]
 
-    data = {}
-    for category in categories:
-        data[category] = st.number_input(f"Enter {category} Amount:", key=category)
+        selected_category = st.selectbox("Select Category:", categories)
+        category_amount = st.number_input(f"Enter Amount for {selected_category}:", min_value=0.0)
 
-    if st.button("Submit"):
-        save_to_csv(data, site_name)
-        st.success("Data saved successfully!")
+        # Save data to a list
+        data = []
+        if st.button("Submit"):
+            data.append([date, selected_category, category_amount])
 
-    if st.button("Get Data"):
-        get_site_name = st.text_input("Enter Site Name to retrieve data:")
-        try:
-            df = pd.read_csv(f"{get_site_name}.csv")
-            st.write(df)
-        except FileNotFoundError:
-            st.error(f"No data found for Site Name: {get_site_name}")
+        # Save data to CSV and display it
+        if st.button("Save to CSV"):
+            filename = save_to_csv(site_name, data)
+            st.success(f"Data saved to {filename}")
 
-    st.subheader("All Subcategories Titles:")
-    st.write(", ".join(categories))
+        # Get data for a specific site
+        if st.button("Get Data"):
+            selected_site = st.text_input("Enter Site Name to Retrieve Data:")
+            retrieved_data = get_data(selected_site)
+            if retrieved_data is not None:
+                st.write("Retrieved Data:")
+                st.write(retrieved_data)
+            else:
+                st.warning("Data not found for the specified site.")
 
-if _name_ == "_main_":
+        # Display total for each sub-category
+        st.title("Total Expenditure by Sub-Category:")
+        for category in categories:
+            total_amount = data_df[data_df["Category"] == category]["Amount"].sum()
+            st.write(f"{category}: ${total_amount:,.2f}")
+
+if __name__ == "__main__":
     main()
