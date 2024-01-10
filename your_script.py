@@ -1,67 +1,44 @@
 import streamlit as st
 import pandas as pd
 
-# Create a DataFrame to store the data
-df = pd.DataFrame(columns=['Site Name', 'Contract Amount', 'Date', 'Category', 'Amount'])
+def save_to_csv(data, site_name):
+    df = pd.DataFrame(data)
+    df.to_csv(f"{site_name}.csv", index=False)
 
-# Function to save data to CSV file
-def save_data():
-    site_name = st.session_state.site_name
-    df_site = df[df['Site Name'] == site_name]
-    df_site.to_csv(f'{site_name}.csv', index=False)
-
-# Function to get data for a selected site
-def get_data():
-    site_name = st.session_state.site_name
-    df_site = df[df['Site Name'] == site_name]
-    st.write(df_site)
-
-# Function to display total amounts for each category
-def display_totals():
-    st.subheader('Total Amounts Till Now:')
-    totals = df.groupby('Category')['Amount'].sum()
-    st.write(totals)
-
-# Streamlit app
 def main():
-    st.title('Construction Site Tracker')
+    st.title("Construction Site Data Entry App")
 
-    # Input for Site Name and Contract Amount
-    st.sidebar.header('Input')
-    st.sidebar.text_input('Site Name', key='site_name')
-    st.sidebar.number_input('Contract Amount', key='contract_amount')
+    site_name = st.text_input("Enter Site Name:")
+    contract_amount = st.number_input("Enter Site Contract Amount:")
 
-    # Date input
-    st.sidebar.header('Date Input')
-    date_input = st.sidebar.date_input('Select Date', pd.to_datetime('today'))
+    if st.button("Show Site Info"):
+        st.write(f"Site Name: {site_name}")
+        st.write(f"Site Contract Amount: {contract_amount}")
 
-    # Sub-inputer for categories
-    st.sidebar.header('Category Input')
-    category = st.sidebar.selectbox('Select Category', ['Bricks', 'Plumber', 'Murum', 'Sand', 'Aggregate',
-                                                        'Steel', 'Electrical material', 'Plumbing material',
-                                                        'Flooring material', 'Labor payment', 'Ducting', 'Rcc labor',
-                                                        'Brick work and plaster work', 'Electric labor', 'Plumbing labor',
-                                                        'Flooring labor', 'IPS labor'], key='category')
+    date = st.date_input("Select Date:")
 
-    amount = st.sidebar.number_input('Amount', key='amount')
+    categories = ['Bricks', 'Plumber', 'Murum', 'Sand', 'Aggregate', 'Steel', 'Electrical material',
+                  'Plumbing material', 'Flooring material', 'Labor payment', 'Ducting', 'Rcc labor',
+                  'Brick work and plaster work', 'Electric labor', 'Plumbing labor', 'Flooring labor', 'IPS labor']
 
-    # Submit button to save data
-    if st.sidebar.button('Submit'):
-        site_name = st.session_state.site_name
-        contract_amount = st.session_state.contract_amount
-        df.loc[len(df)] = [site_name, contract_amount, date_input, category, amount]
-        st.success('Data submitted successfully!')
+    data = {}
+    for category in categories:
+        data[category] = st.number_input(f"Enter {category} Amount:", key=category)
 
-    # Get Data button to display entries for a selected site
-    if st.sidebar.button('Get Data'):
-        get_data()
+    if st.button("Submit"):
+        save_to_csv(data, site_name)
+        st.success("Data saved successfully!")
 
-    # Save Data button to save data to CSV file
-    if st.sidebar.button('Save Data'):
-        save_data()
+    if st.button("Get Data"):
+        get_site_name = st.text_input("Enter Site Name to retrieve data:")
+        try:
+            df = pd.read_csv(f"{get_site_name}.csv")
+            st.write(df)
+        except FileNotFoundError:
+            st.error(f"No data found for Site Name: {get_site_name}")
 
-    # Display totals
-    display_totals()
+    st.subheader("All Subcategories Titles:")
+    st.write(", ".join(categories))
 
-if __name__ == '__main__':
+if _name_ == "_main_":
     main()
