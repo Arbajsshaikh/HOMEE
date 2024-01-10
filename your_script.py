@@ -1,81 +1,44 @@
 import streamlit as st
 import pandas as pd
-import os
 
-# Initialize DataFrames outside the main function
-sites_df = pd.DataFrame(columns=["Site Name"])
-df = pd.DataFrame(columns=["Site Name", "Date", "Category", "Amount"])
+# Function to create or load the data frame
+@st.cache
+def load_data():
+    return pd.DataFrame(columns=['Expense Type', 'Amount'])
 
-# Function to save data to CSV file
-def save_to_csv(site_name, data):
-    filename = f"{site_name}.csv"
-    data_pivoted = data.pivot(index="Date", columns="Category", values="Amount")
-    data_pivoted.to_csv(filename)
-    return filename
+# Function to update and display the data frame
+def update_data(data):
+    st.write("## Construction Site Tracker")
+    st.table(data)
 
-# Function to get data from CSV file
-def get_data(site_name):
-    filename = f"{site_name}.csv"
-    try:
-        df = pd.read_csv(filename, index_col="Date")
-        return df
-    except FileNotFoundError:
-        return None
+# Function to add new expenses to the data frame
+def add_expense(data, expense_type, amount):
+    data = data.append({'Expense Type': expense_type, 'Amount': amount}, ignore_index=True)
+    return data
 
 # Main Streamlit app
 def main():
-    global sites_df, df  # Declare sites_df and df as global
-
     st.title("Construction Site Tracker")
 
-    # Add Site input with dropdown selector
-    add_site_name = st.text_input("Add Site Name:")
-    if add_site_name:
-        sites_df = pd.concat([sites_df, pd.DataFrame([{"Site Name": add_site_name}])], ignore_index=True)
+    # Load existing data or create a new data frame
+    data = load_data()
 
-    # Site Name dropdown
-    selected_site_name = st.selectbox("Select Site Name:", sites_df["Site Name"].tolist())
+    # Sidebar for adding new expenses
+    st.sidebar.header("Add New Expense")
+    expense_type = st.sidebar.text_input("Expense Type")
+    amount = st.sidebar.number_input("Amount", min_value=0.0)
 
-    # Date input
-    date = st.date_input("Enter Date:")
-        # Sub-categories and their inputs
-    categories = [
-            'Bricks', 'Plumber', 'Murum', 'Sand', 'Aggregate', 'Steel',
-            'Electrical material', 'Plumbing material', 'Flooring material',
-            'Labor payment', 'Ducting', 'Rcc labor', 'Brick work and plaster work',
-            'Electric labor', 'Plumbing labor', 'Flooring labor', 'IPS labor' ]
+    if st.sidebar.button("Add Expense"):
+        if expense_type and amount:
+            data = add_expense(data, expense_type, amount)
 
-        selected_category = st.selectbox("Select Category:", categories)
-        category_amount = st.number_input(f"Enter Amount for {selected_category}:", min_value=0.0)    
-    # Save data to the global DataFrame
-    if st.button("Submit"):
-        new_data = {"Site Name": selected_site_name, "Date": date, "Category": selected_category, "Amount": category_amount}
-        df = pd.concat([df, pd.DataFrame([new_data])], ignore_index=True)
+    # Display the updated data frame
+    update_data(data)
 
-    # Save data to CSV and display it
-    if st.button("Save to CSV"):
-        filename = save_to_csv(selected_site_name, df)
-        st.success(f"Data saved to {filename}")
+    # Calculate and display the total expenses
+    total_expenses = data['Amount'].sum()
+    st.write(f"## Total Expenses: ${total_expenses:.2f}")
 
-    # Get data for a specific site
-    if st.button("Get Data"):
-        retrieved_data = get_data(selected_site_name)
-        if retrieved_data is not None:
-            st.write("Retrieved Data:")
-            st.write(retrieved_data)
-        else:
-            st.warning("Data not found for the specified site.")
-
-    # Display total for each sub-category
-    st.title("Total Expenditure by Sub-Category:")
-    for category in df["Category"].unique():
-        total_amount = df[(df["Site Name"] == selected_site_name) & (df["Category"] == category)]["Amount"].sum()
-        st.write(f"{category}: ${total_amount:,.2f}")
-
-    # Download button for CSV
-    if st.button("Download CSV"):
-        csv_file = save_to_csv(selected_site_name, df)
-        st.download_button(label="Download CSV", data=open(csv_file, "rb").read(), key="download_csv", file_name=os.path.basename(csv_file))
-
+# Run the app
 if __name__ == "__main__":
     main()
