@@ -1,44 +1,78 @@
 import streamlit as st
 import pandas as pd
 
-# Function to create or load the data frame
-@st.cache
-def load_data():
-    return pd.DataFrame(columns=['Expense Type', 'Amount'])
+# Initialize DataFrame outside the main function
+df = pd.DataFrame(columns=["Site Name", "Date", "Category", "Amount"])
 
-# Function to update and display the data frame
-def update_data(data):
-    st.write("## Construction Site Tracker")
-    st.table(data)
+# Function to save data to CSV file
+def save_to_csv(site_name, data):
+    filename = f"{site_name}.csv"
+    data.to_csv(filename, index=False)
+    return filename
 
-# Function to add new expenses to the data frame
-def add_expense(data, expense_type, amount):
-    data = data.append({'Expense Type': expense_type, 'Amount': amount}, ignore_index=True)
-    return data
+# Function to get data from CSV file
+def get_data(site_name):
+    filename = f"{site_name}.csv"
+    try:
+        df = pd.read_csv(filename)
+        return df
+    except FileNotFoundError:
+        return None
 
 # Main Streamlit app
 def main():
+    global df  # Make sure to use the global DataFrame
+
     st.title("Construction Site Tracker")
 
-    # Load existing data or create a new data frame
-    data = load_data()
+    # Input fields for site name and contract amount
+    site_name = st.text_input("Enter Site Name:")
+    contract_amount = st.number_input("Enter Site Contract Amount:", min_value=0.0)
 
-    # Sidebar for adding new expenses
-    st.sidebar.header("Add New Expense")
-    expense_type = st.sidebar.text_input("Expense Type")
-    amount = st.sidebar.number_input("Amount", min_value=0.0)
+    # Display site name and contract amount
+    if site_name and contract_amount:
+        st.sidebar.write(f"Site Name: {site_name}")
+        st.sidebar.write(f"Contract Amount: ${contract_amount:,.2f}")
 
-    if st.sidebar.button("Add Expense"):
-        if expense_type and amount:
-            data = add_expense(data, expense_type, amount)
+        # Date input
+        date = st.date_input("Enter Date:")
 
-    # Display the updated data frame
-    update_data(data)
+        # Sub-categories and their inputs
+        categories = [
+            'Bricks', 'Plumber', 'Murum', 'Sand', 'Aggregate', 'Steel',
+            'Electrical material', 'Plumbing material', 'Flooring material',
+            'Labor payment', 'Ducting', 'Rcc labor', 'Brick work and plaster work',
+            'Electric labor', 'Plumbing labor', 'Flooring labor', 'IPS labor'
+        ]
 
-    # Calculate and display the total expenses
-    total_expenses = data['Amount'].sum()
-    st.write(f"## Total Expenses: ${total_expenses:.2f}")
+        selected_category = st.selectbox("Select Category:", categories)
+        category_amount = st.number_input(f"Enter Amount for {selected_category}:", min_value=0.0)
 
-# Run the app
+        # Save data to the global DataFrame
+        if st.button("Submit"):
+            new_data = {"Site Name": site_name, "Date": date, "Category": selected_category, "Amount": category_amount}
+            df = pd.concat([df, pd.DataFrame([new_data])], ignore_index=True)
+
+        # Save data to CSV and display it
+        if st.button("Save to CSV"):
+            filename = save_to_csv(site_name, df)
+            st.success(f"Data saved to {filename}")
+
+        # Get data for a specific site
+        if st.button("Get Data"):
+            selected_site = st.text_input("Enter Site Name to Retrieve Data:")
+            retrieved_data = get_data(selected_site)
+            if retrieved_data is not None:
+                st.write("Retrieved Data:")
+                st.write(retrieved_data)
+            else:
+                st.warning("Data not found for the specified site.")
+
+        # Display total for each sub-category
+        st.title("Total Expenditure by Sub-Category:")
+        for category in categories:
+            total_amount = df[df["Category"] == category]["Amount"].sum()
+            st.write(f"{category}: ${total_amount:,.2f}")
+
 if __name__ == "__main__":
     main()
