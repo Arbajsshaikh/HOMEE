@@ -34,6 +34,9 @@ def main():
     # Set selected site in session state
     st.session_state.site_name = selected_site
 
+    # Display selected site name on the right side
+    st.text(f'Construction Site Tracker: {selected_site}')
+
     # Display contract amount if set previously
     if selected_site in df['Site Name'].values:
         contract_amount = df.loc[df['Site Name'] == selected_site, 'Contract Amount'].iloc[0]
@@ -41,8 +44,11 @@ def main():
 
     # Input for Site Name and Contract Amount
     st.sidebar.header('Input')
-    st.sidebar.text_input('New Site Name', key='site_name')
+    new_site_name = st.sidebar.text_input('New Site Name', key='site_name', value=selected_site)
     st.sidebar.number_input('Contract Amount', key='contract_amount')
+
+    # Update session state with entered site name
+    st.session_state.site_name = new_site_name
 
     # Date input
     st.sidebar.header('Date Input')
@@ -50,19 +56,13 @@ def main():
 
     # Sub-inputer for categories
     st.sidebar.header('Category Input')
-    category = st.sidebar.selectbox('Select Category', ['Bricks', 'Plumber', 'Murum', 'Sand', 'Aggregate',
-                                                        'Steel', 'Electrical material', 'Plumbing material',
-                                                        'Flooring material', 'Labor payment', 'Ducting', 'Rcc labor',
-                                                        'Brick work and plaster work', 'Electric labor', 'Plumbing labor',
-                                                        'Flooring labor', 'IPS labor'], key='category')
-
+    category = st.sidebar.text_input('Select Category', key='category')
     amount = st.sidebar.number_input('Amount', key='amount')
 
     # Submit button to save data
-    if st.sidebar.button('Submit'):
-        site_name = st.session_state.site_name
-        contract_amount = st.session_state.contract_amount
-        df.loc[len(df)] = [site_name, contract_amount, date_input, category, amount]
+    if st.sidebar.button('Submit') and new_site_name:
+        contract_amount = st.sidebar.session_state.contract_amount
+        df.loc[len(df)] = [new_site_name, contract_amount, date_input, category, amount]
         st.success('Data submitted successfully!')
 
     # Get Data button to display entries for a selected site
