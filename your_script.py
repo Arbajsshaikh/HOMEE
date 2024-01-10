@@ -4,6 +4,12 @@ import pandas as pd
 # Create a DataFrame to store the data
 df = pd.DataFrame(columns=['Site Name', 'Contract Amount', 'Date', 'Category', 'Amount'])
 
+# Initialize session state variables
+if 'site_name' not in st.session_state:
+    st.session_state.site_name = ''
+if 'contract_amount' not in st.session_state:
+    st.session_state.contract_amount = 0
+
 # Function to save data to CSV file
 def save_data():
     site_name = st.session_state.site_name
@@ -44,11 +50,12 @@ def main():
 
     # Input for Site Name and Contract Amount
     st.sidebar.header('Input')
-    new_site_name = st.sidebar.text_input('New Site Name', key='site_name', value=selected_site)
-    st.sidebar.number_input('Contract Amount', key='contract_amount')
+    new_site_name = st.sidebar.text_input('New Site Name', key='site_name', value=st.session_state.site_name)
+    contract_amount = st.sidebar.number_input('Contract Amount', key='contract_amount', value=st.session_state.contract_amount)
 
-    # Update session state with entered site name
+    # Update session state with entered site name and contract amount
     st.session_state.site_name = new_site_name
+    st.session_state.contract_amount = contract_amount
 
     # Date input
     st.sidebar.header('Date Input')
@@ -61,7 +68,6 @@ def main():
 
     # Submit button to save data
     if st.sidebar.button('Submit') and new_site_name:
-        contract_amount = st.sidebar.session_state.contract_amount
         df.loc[len(df)] = [new_site_name, contract_amount, date_input, category, amount]
         st.success('Data submitted successfully!')
 
