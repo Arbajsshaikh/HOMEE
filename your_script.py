@@ -1,6 +1,9 @@
 import streamlit as st
 import pandas as pd
 
+# Initialize DataFrame outside the main function
+df = pd.DataFrame(columns=["Site Name", "Date", "Category", "Amount"])
+
 # Function to save data to CSV file
 def save_to_csv(site_name, data):
     filename = f"{site_name}.csv"
@@ -20,8 +23,6 @@ def get_data(site_name):
 # Main Streamlit app
 def main():
     st.title("Construction Site Tracker")
-    # Create an empty DataFrame to store data
-    df = pd.DataFrame(columns=["Date", "Category", "Amount"])
 
     # Input fields for site name and contract amount
     site_name = st.text_input("Enter Site Name:")
@@ -46,14 +47,14 @@ def main():
         selected_category = st.selectbox("Select Category:", categories)
         category_amount = st.number_input(f"Enter Amount for {selected_category}:", min_value=0.0)
 
-        # Save data to a list
-        data = []
+        # Save data to the global DataFrame
+        global df
         if st.button("Submit"):
-            data.append([date, selected_category, category_amount])
+            df = df.append({"Site Name": site_name, "Date": date, "Category": selected_category, "Amount": category_amount}, ignore_index=True)
 
         # Save data to CSV and display it
         if st.button("Save to CSV"):
-            filename = save_to_csv(site_name, data)
+            filename = save_to_csv(site_name, df)
             st.success(f"Data saved to {filename}")
 
         # Get data for a specific site
@@ -71,5 +72,6 @@ def main():
         for category in categories:
             total_amount = df[df["Category"] == category]["Amount"].sum()
             st.write(f"{category}: ${total_amount:,.2f}")
+
 if __name__ == "__main__":
     main()
