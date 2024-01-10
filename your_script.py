@@ -48,9 +48,11 @@ def main():
         category_amount = st.number_input(f"Enter Amount for {selected_category}:", min_value=0.0)
 
         # Save data to the global DataFrame
+        # Save data to the global DataFrame
         global df
         if st.button("Submit"):
-            df = df.append({"Site Name": site_name, "Date": date, "Category": selected_category, "Amount": category_amount}, ignore_index=True)
+            new_data = {"Site Name": site_name, "Date": date, "Category": selected_category, "Amount": category_amount}
+            df = pd.concat([df, pd.DataFrame([new_data])], ignore_index=True)
 
         # Save data to CSV and display it
         if st.button("Save to CSV"):
