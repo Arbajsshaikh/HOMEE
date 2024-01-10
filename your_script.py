@@ -20,6 +20,8 @@ def get_data(site_name):
 # Main Streamlit app
 def main():
     st.title("Construction Site Tracker")
+    # Create an empty DataFrame to store data
+    df = pd.DataFrame(columns=["Date", "Category", "Amount"])
 
     # Input fields for site name and contract amount
     site_name = st.text_input("Enter Site Name:")
@@ -68,8 +70,6 @@ def main():
         st.title("Total Expenditure by Sub-Category:")
         for category in categories:
             total_amount = df[df["Category"] == category]["Amount"].sum()
-
             st.write(f"{category}: ${total_amount:,.2f}")
-
 if __name__ == "__main__":
     main()
