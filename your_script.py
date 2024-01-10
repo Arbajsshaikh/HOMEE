@@ -38,7 +38,15 @@ def main():
 
     # Date input
     date = st.date_input("Enter Date:")
-    
+        # Sub-categories and their inputs
+    categories = [
+            'Bricks', 'Plumber', 'Murum', 'Sand', 'Aggregate', 'Steel',
+            'Electrical material', 'Plumbing material', 'Flooring material',
+            'Labor payment', 'Ducting', 'Rcc labor', 'Brick work and plaster work',
+            'Electric labor', 'Plumbing labor', 'Flooring labor', 'IPS labor' ]
+
+        selected_category = st.selectbox("Select Category:", categories)
+        category_amount = st.number_input(f"Enter Amount for {selected_category}:", min_value=0.0)    
     # Save data to the global DataFrame
     if st.button("Submit"):
         new_data = {"Site Name": selected_site_name, "Date": date, "Category": selected_category, "Amount": category_amount}
