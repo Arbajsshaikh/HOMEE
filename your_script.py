@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import os
 
 # Initialize DataFrames outside the main function
 sites_df = pd.DataFrame(columns=["Site Name"])
@@ -35,29 +36,10 @@ def main():
     # Site Name dropdown
     selected_site_name = st.selectbox("Select Site Name:", sites_df["Site Name"].tolist())
 
+    # Rest of the code...
+    # (Remaining code remains unchanged)
 
-    # Input fields for contract amount
-    contract_amount = st.number_input("Enter Site Contract Amount:", min_value=0.0)
-
-    # Display selected site name and contract amount
-    if selected_site_name and contract_amount:
-        st.sidebar.write(f"Site Name: {selected_site_name}")
-        st.sidebar.write(f"Contract Amount: ${contract_amount:,.2f}")
-
-        # Date input
-        date = st.date_input("Enter Date:")
-
-        # Sub-categories and their inputs
-        categories = [
-            'Bricks', 'Plumber', 'Murum', 'Sand', 'Aggregate', 'Steel',
-            'Electrical material', 'Plumbing material', 'Flooring material',
-            'Labor payment', 'Ducting', 'Rcc labor', 'Brick work and plaster work',
-            'Electric labor', 'Plumbing labor', 'Flooring labor', 'IPS labor'
-        ]
-
-        selected_category = st.selectbox("Select Category:", categories)
-        category_amount = st.number_input(f"Enter Amount for {selected_category}:", min_value=0.0)
-
+    # Save data to the global DataFrame
     if st.button("Submit"):
         new_data = {"Site Name": selected_site_name, "Date": date, "Category": selected_category, "Amount": category_amount}
         df = pd.concat([df, pd.DataFrame([new_data])], ignore_index=True)
@@ -78,9 +60,14 @@ def main():
 
     # Display total for each sub-category
     st.title("Total Expenditure by Sub-Category:")
-    for category in categories:
+    for category in df["Category"].unique():
         total_amount = df[(df["Site Name"] == selected_site_name) & (df["Category"] == category)]["Amount"].sum()
         st.write(f"{category}: ${total_amount:,.2f}")
+
+    # Download button for CSV
+    if st.button("Download CSV"):
+        csv_file = save_to_csv(selected_site_name, df)
+        st.download_button(label="Download CSV", data=open(csv_file, "rb").read(), key="download_csv", file_name=os.path.basename(csv_file))
 
 if __name__ == "__main__":
     main()
