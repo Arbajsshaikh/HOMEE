@@ -50,8 +50,16 @@ def main():
 
         # Save data to the global DataFrame
         if st.button("Submit"):
-            new_data = {"Site Name": site_name, "Date": date, "Category": selected_category, "Amount": category_amount}
-            df = pd.concat([df, pd.DataFrame([new_data])], ignore_index=True)
+            # Check if the category already exists for the given date
+            existing_entry = df[(df["Date"] == date) & (df["Category"] == selected_category)]
+
+            if not existing_entry.empty:
+                # Update existing entry
+                df.loc[existing_entry.index, "Amount"] += category_amount
+            else:
+                # Add new entry
+                new_data = {"Site Name": site_name, "Date": date, "Category": selected_category, "Amount": category_amount}
+                df = pd.concat([df, pd.DataFrame([new_data])], ignore_index=True)
 
         # Save data to CSV and display it
         if st.button("Save to CSV"):
