@@ -4,12 +4,6 @@ import pandas as pd
 # Create a DataFrame to store the data
 df = pd.DataFrame(columns=['Site Name', 'Contract Amount', 'Date', 'Category', 'Amount'])
 
-# Initialize session state variables
-if 'site_name' not in st.session_state:
-    st.session_state.site_name = ''
-if 'contract_amount' not in st.session_state:
-    st.session_state.contract_amount = 0
-
 # Function to save data to CSV file
 def save_data():
     site_name = st.session_state.site_name
@@ -50,13 +44,8 @@ def main():
 
     # Input for Site Name and Contract Amount
     st.sidebar.header('Input')
-    new_site_name = st.sidebar.text_input('New Site Name', key='site_name', value=st.session_state.site_name)
-
-    contract_amount = st.sidebar.number_input('Contract Amount', key='contract_amount', value=st.session_state.contract_amount)
-
-    # Update session state with entered site name and contract amount
-    st.session_state.site_name = new_site_name
-    st.session_state.contract_amount = contract_amount
+    st.sidebar.text_input('New Site Name', key='site_name', value=selected_site)
+    st.sidebar.number_input('Contract Amount', key='contract_amount')
 
     # Date input
     st.sidebar.header('Date Input')
@@ -64,12 +53,19 @@ def main():
 
     # Sub-inputer for categories
     st.sidebar.header('Category Input')
-    category = st.sidebar.text_input('Select Category', key='category', value='')
-    amount = st.sidebar.number_input('Amount', key='amount', value=0)
+    category = st.sidebar.selectbox('Select Category', ['Bricks', 'Plumber', 'Murum', 'Sand', 'Aggregate',
+                                                        'Steel', 'Electrical material', 'Plumbing material',
+                                                        'Flooring material', 'Labor payment', 'Ducting', 'Rcc labor',
+                                                        'Brick work and plaster work', 'Electric labor', 'Plumbing labor',
+                                                        'Flooring labor', 'IPS labor'], key='category')
+
+    amount = st.sidebar.number_input('Amount', key='amount')
 
     # Submit button to save data
-    if st.sidebar.button('Submit') and new_site_name:
-        df.loc[len(df)] = [new_site_name, contract_amount, date_input, category, amount]
+    if st.sidebar.button('Submit'):
+        site_name = st.session_state.site_name
+        contract_amount = st.session_state.contract_amount
+        df.loc[len(df)] = [site_name, contract_amount, date_input, category, amount]
         st.success('Data submitted successfully!')
 
     # Get Data button to display entries for a selected site
